@@ -1,3 +1,45 @@
+Provides basic CRUD functionality by using this Trait in any controller.
+The ksof:config can write a `BaseKrudController.php` in your `App/Http/Controller` that extents functionality form this trait, for your controller.
+
+### How to use it
+
+Just use it in your Class.
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Ksoft\Klaravel\Traits\JsonTrait;
+use Ksoft\Klaravel\Traits\KrudControllerTrait;
+
+class BaseKrudController extends Controller
+{
+    use JsonTrait, KrudControllerTrait;
+
+    /**
+     * @var ModelRespository
+     */
+    protected $repo;
+
+    /**
+     * @var ModelCreateIteracion
+     */
+    protected $createInteraction;
+
+    /**
+     * @var ModelUpdateInteraction
+     */
+    protected $updateInteraction;
+
+}
+```
+
+## KrudControllerTrait.php
+
+This are all your methods your controller has extended functionality just by using it.
+
+```php
 <?php
 
 namespace Ksoft\Klaravel\Traits;
@@ -45,8 +87,7 @@ trait KrudControllerTrait
    */
   public function store(Request $request)
   {
-      $record = $this->interaction($this->createInteraction, [$request->all()]);
-      return $this->createdResponse($record);
+      return $this->interaction($this->createInteraction, [$request->all()]);
   }
 
   /**
@@ -60,8 +101,7 @@ trait KrudControllerTrait
    */
   public function update(Request $request, $id)
   {
-      $record = $this->interaction($this->updateInteraction, [$id, $request->all()]);
-      return $this->successResponse($record);
+      return $this->interaction($this->updateInteraction, [$id, $request->all()]);
   }
 
   /**
@@ -75,7 +115,6 @@ trait KrudControllerTrait
   public function destroy($id)
   {
       $this->repo->delete($id);
-      return $this->deletedResponse();
   }
 
   /**
@@ -113,9 +152,4 @@ trait KrudControllerTrait
 
       return call_user_func_array([app($class), $method], $parameters);
   }
-
-  abstract protected function successResponse($data);
-  abstract protected function createdResponse($data);
-  abstract protected function deletedResponse();
-
 }

@@ -2,9 +2,12 @@
 
 namespace App\Repositories%subfolder%;
 
-use %model_path%;
 use App\Contracts\Repositories%subfolder%\%model%Repository as Contract;
+use %model_path%;
 use Ksoft\Klaravel\Repositories\EloquentRepo;
+// https://github.com/rlacerda83/lumen-api-query-parser
+// composer require rlacerda83/query-parser:master
+// use QueryParser\ParserRequestFactory;
 
 class %model%Repository extends EloquentRepo implements Contract
 {
@@ -13,22 +16,27 @@ class %model%Repository extends EloquentRepo implements Contract
         return %modelSingular%::class;
     }
 
-    public function withRelationships($paginate = 0, $searchQ = '')
+    /**
+     * Listing page records.
+     * https://github.com/rlacerda83/lumen-api-query-parser/wiki/Usage
+     *
+     * @param  Illuminate\Http\Request $request
+     * @return Pagination|Collection|Array
+     */
+    public function withRelationships($request)
     {
-        $query = $this->model; // ->with('relation');
+        $search_term = $request->input('q') ?: '';
 
-        if ($searchQ != '') {
-            $query->where('name', 'LIKE', '%'.$searchQ.'%');
-            //$query->orWhere('description', 'LIKE', '%'.$searchQ.'%');
-        }
+        // Eloquent
+        // $queryParser  = ParserRequestFactory::createParser($request, $this->model, $this->model);
+        // QueryBuilder
+        // $queryParser  = ParserRequestFactory::createParser($request, $this->model);
+        // $queryBuilder = $queryParser->parser();
 
-        $query->orderBy('id', 'desc');
+        $queryBuilder = $this->model::where('id','>', 0);
 
-        if ($paginate>0) {
-            return $query->paginate($paginate);
-        } else {
-            return $query->get();
-        }
+        return $this->paginateIf($queryBuilder->get());
+
     }
 
 }

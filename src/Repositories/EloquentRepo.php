@@ -26,6 +26,7 @@ abstract class EloquentRepo implements Contract
      * {@inheritdoc}
      */
     abstract protected function model();
+
     /**
      * @param $request
      */
@@ -116,7 +117,7 @@ abstract class EloquentRepo implements Contract
      */
     public function paginateIf($records)
     {
-        $per_page = $this->request->input('limit') > 0 ? $this->request->input('limit') : 0;
+        $per_page = $this->request->input('take') > 0 ? $this->request->input('take') : 0;
 
         if ($per_page > 0) {
 
@@ -149,7 +150,9 @@ abstract class EloquentRepo implements Contract
      */
     public function update($id, array $properties)
     {
-        return $this->find($id)->update($properties);
+        $record = $this->find($id);
+        $record->update($properties);
+        return $record;
     }
 
     /**

@@ -1,7 +1,7 @@
 {
     "name": "ksoft/klaravel",
-    "version": "1.0.0",
-    "description": "A collection of traits and usefull classes and php functions for Laravel",
+    "version": "1.0.7",
+    "description": "This package provides functionalities and structures definitions that are able to speed up your development generating classes and repositories with extended functionality that allows implementation of advanced techniques used in large projects where maintainability its key.",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -24,9 +24,21 @@
     },
     "require": {
         "doctrine/dbal": "^2.6",
-        "intervention/image": "^2.4",
         "kevupton/ethereal": "v2.3.9.6",
-        "kevupton/laravel-swagger": "^1.4",
-        "ramsey/uuid": "^3.7"
+        "zircote/swagger-php": "^2.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ksoft\\Klaravel\\ServiceProvider"
+            ],
+            "aliases": {
+                "Larapp": "Ksoft\\Klaravel\\Facade"
+            }
+        }
+    },
+    "require-dev": {
+        "laravel/laravel": "^5.5",
+        "laravel/lumen": "^5.5"
     }
 }

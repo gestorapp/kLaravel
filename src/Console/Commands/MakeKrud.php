@@ -19,9 +19,9 @@ class MakeKrud extends Command
      * @var string
      */
     protected $signature = 'ksoft:krud
-                            {model : Model name}
-                            {--R|no-routes : Dont add dynamic rotues to api.php}
-                            {--F|folder= : Optional Subfolder}
+                            {model : table name from where you want CRUD generated}
+                            {--R|no-routes : if this flag is enabled, routes will not be writen to api.php (Only on screen)}
+                            {--F|folder= : Optional, recommended Subfolder to save files to}
                             {--P|prefix= : Route prefix}';
 
     /**
@@ -89,7 +89,7 @@ class MakeKrud extends Command
         }
 
         // Print Contract lines in console.
-        $this->error('-------- [CONTRACT] => [INTERACTION] ----------');
+        $this->error('-------- [CONTRACT] => [INTERACTION] AppServiceProvider.php ----------');
         $this->info("// $this->model_name");
         foreach ($this->printableContracts as $line) {
             $this->info($line);
@@ -147,10 +147,11 @@ class MakeKrud extends Command
                 return;
             }
             $this->fileManager->put($filePath, $content);
-        } elseif ($this->force) { // No matter what, we going to write it there.
+        } elseif (!$this->force && !$this->laravel->runningInConsole() && $this->fileManager->exists($filePath)) {
+            // Overwrite its not enabled, we runing in console, file exists.
+            // we do nothing here....
+        } elseif (!$this->fileManager->exists($filePath) || ($this->fileManager->exists($filePath) && $this->force)) {
             $this->fileManager->put($filePath, $content);
-        } else {
-            logi('Skipping file overwirte due to configuration value.'.$filePath);
         }
 
         if (0 === strpos($this->write_paths[$key], 'Contracts/')) {
@@ -164,7 +165,7 @@ class MakeKrud extends Command
 
     protected function prepareThings()
     {
-        $name       = str_singular($this->argument('model'));
+        $name       = studly_case(str_singular($this->argument('model')));
         $path       = config('ksoft.models_path');
         $full_model = app()->getNamespace().$path.$name;
 
@@ -180,17 +181,12 @@ class MakeKrud extends Command
     {
 
         // Disabled for now, uncomment and require libraries if yo uwnat to use it....
-        logi($this->namespace_model);
         if ($this->force && !class_exists($this->namespace_model)) {
             $tableFieldsGenerator = new TableFieldsGenerator(snake_case($this->argument('model')));
             $tableFieldsGenerator->prepareFieldsFromTable();
             $tableFieldsGenerator->prepareRelations();
             $this->fields = $tableFieldsGenerator->fields;
             //$this->relations = $tableFieldsGenerator->relations;
-            logi('$this->fields');
-            logi(json_encode($this->fields));
-            // logi('$this->relations' );
-            // logi(json_encode($this->relations));
             // $this->call('code:models', ['--table' => snake_case($this->model_name)]);
             // $this->call('infyom:model', ['model' => str_singular($this->model_name), '--fromTable' => 'yes']);
         }
@@ -215,7 +211,7 @@ class MakeKrud extends Command
             '%folder%'   => $folder,
         ];
         $parsedRoutes = str_replace(array_keys($replacements), array_values($replacements), $newRoutes);
-
+        $this->error('-------- [Resource Route] => routes/api.php ----------');
         $this->info($parsedRoutes);
 
         if ($this->option('no-routes')) {
